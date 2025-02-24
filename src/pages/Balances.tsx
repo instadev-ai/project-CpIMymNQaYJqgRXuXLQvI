@@ -1,28 +1,21 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight, DollarSign, UserRound, CheckCircle2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
+import { useExpenseContext } from "./AddExpense";
 
 const Balances = () => {
   const navigate = useNavigate();
+  const { calculateBalances, generateSettlements } = useExpenseContext();
   
-  // Sample data for balances
-  const [balances, setBalances] = useState([
-    { id: 1, name: "Alex", amount: -45.25 }, // negative means you owe them
-    { id: 2, name: "Jamie", amount: 32.50 }, // positive means they owe you
-    { id: 3, name: "Taylor", amount: -18.75 },
-  ]);
-
-  // Sample data for settlement suggestions
-  const [settlements, setSettlements] = useState([
-    { id: 1, from: "You", to: "Alex", amount: 45.25 },
-    { id: 2, from: "Jamie", to: "You", amount: 32.50 },
-    { id: 3, from: "You", to: "Taylor", amount: 18.75 },
-  ]);
+  // Get balances from the context
+  const balances = calculateBalances();
+  
+  // Get settlement suggestions from the context
+  const [settlements, setSettlements] = React.useState(generateSettlements());
 
   const totalOwed = balances.reduce((sum, balance) => 
     balance.amount > 0 ? sum + balance.amount : sum, 0);
@@ -107,25 +100,31 @@ const Balances = () => {
                 <CardTitle>Individual Balances</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {balances.map((balance) => (
-                    <div key={balance.id} className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
-                          <span className="text-sm font-medium">{balance.name.charAt(0)}</span>
+                {balances.length > 0 ? (
+                  <div className="space-y-4">
+                    {balances.map((balance) => (
+                      <div key={balance.id} className="flex justify-between items-center">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                            <span className="text-sm font-medium">{balance.name.charAt(0)}</span>
+                          </div>
+                          <span className="font-medium">{balance.name}</span>
                         </div>
-                        <span className="font-medium">{balance.name}</span>
+                        <div className={`font-semibold ${balance.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {balance.amount > 0 ? (
+                            <span>owes you ${balance.amount.toFixed(2)}</span>
+                          ) : (
+                            <span>you owe ${Math.abs(balance.amount).toFixed(2)}</span>
+                          )}
+                        </div>
                       </div>
-                      <div className={`font-semibold ${balance.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {balance.amount > 0 ? (
-                          <span>owes you ${balance.amount.toFixed(2)}</span>
-                        ) : (
-                          <span>you owe ${Math.abs(balance.amount).toFixed(2)}</span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No balances to display. Add some expenses first!</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

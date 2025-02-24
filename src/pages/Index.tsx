@@ -1,16 +1,18 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PlusCircle, Users, History, Calculator } from "lucide-react";
+import { useExpenseContext } from "./pages/AddExpense";
 
 const Index = () => {
   const navigate = useNavigate();
-  const [recentExpenses] = useState([
-    { id: 1, description: "Dinner at Olive Garden", amount: 120.50, date: "2023-06-15", paidBy: "Alex" },
-    { id: 2, description: "Movie tickets", amount: 45.00, date: "2023-06-10", paidBy: "Jamie" },
-    { id: 3, description: "Groceries", amount: 78.35, date: "2023-06-05", paidBy: "Taylor" },
-  ]);
+  const { expenses } = useExpenseContext();
+  
+  // Get the 3 most recent expenses
+  const recentExpenses = [...expenses]
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 3);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -80,21 +82,33 @@ const Index = () => {
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4">Recent Expenses</h2>
           <div className="bg-white shadow overflow-hidden sm:rounded-md">
-            <ul className="divide-y divide-gray-200">
-              {recentExpenses.map((expense) => (
-                <li key={expense.id}>
-                  <div className="px-4 py-4 sm:px-6 flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-primary truncate">{expense.description}</p>
-                      <p className="text-sm text-gray-500">
-                        {expense.date} • Paid by {expense.paidBy}
-                      </p>
+            {recentExpenses.length > 0 ? (
+              <ul className="divide-y divide-gray-200">
+                {recentExpenses.map((expense) => (
+                  <li key={expense.id}>
+                    <div className="px-4 py-4 sm:px-6 flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-primary truncate">{expense.description}</p>
+                        <p className="text-sm text-gray-500">
+                          {expense.date} • Paid by {expense.paidBy}
+                        </p>
+                      </div>
+                      <div className="text-sm font-semibold">${expense.amount.toFixed(2)}</div>
                     </div>
-                    <div className="text-sm font-semibold">${expense.amount.toFixed(2)}</div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="px-4 py-12 text-center">
+                <p className="text-gray-500">No expenses yet. Add your first expense!</p>
+                <Button 
+                  className="mt-4" 
+                  onClick={() => navigate("/add-expense")}
+                >
+                  Add Expense
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </main>
