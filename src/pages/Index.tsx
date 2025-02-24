@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PlusCircle, Users, History, Calculator } from "lucide-react";
-import { useExpenseContext } from "./pages/AddExpense";
+import { useExpenseContext } from "../pages/AddExpense";
 
 const Index = () => {
   const navigate = useNavigate();
